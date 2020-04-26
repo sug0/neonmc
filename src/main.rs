@@ -1,10 +1,8 @@
-pub mod nbt;
 pub mod serialize;
 
 use std::io::{self, BufReader};
 
-use nbt::NBT;
-use serialize::DataInput;
+use serialize::{nbt::NBT, DataInput};
 
 fn main() -> io::Result<()> {
     let stdin = io::stdin();
