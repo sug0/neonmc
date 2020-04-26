@@ -97,3 +97,32 @@ impl NBT {
         Ok(NBT { key, tag })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs::File;
+    use std::io::{self, BufReader};
+    use flate2::bufread::GzDecoder;
+
+    use crate::serialize::DataInput;
+    use crate::serialize::nbt::{NBT, Tag};
+
+    fn open_nbt_file(path: &str) -> io::Result<GzDecoder<BufReader<File>>> {
+        let f = File::open(path)?;
+        let r = BufReader::new(f);
+        Ok(GzDecoder::new(r))
+    }
+
+    #[test]
+    fn test_nbt_read() {
+        let gz = open_nbt_file("res/player.dat").unwrap();
+        let mut input = DataInput::new(gz);
+
+        let nbt = NBT::read_from(&mut input).unwrap();
+        
+        match nbt.tag() {
+            Tag::Coumpound(_) => (),
+            _ => panic!("not a coumpound tag"),
+        }
+    }
+}

@@ -5,3 +5,4 @@ authors = ["Tiago Carvalho <sugoiuguu@tfwno.gf>"]
 edition = "2018"
 
 [dependencies]
+flate2 = "1.0.14"
