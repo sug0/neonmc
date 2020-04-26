@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use crate::serialize::DataInput;
 
 #[derive(Clone, Debug)]
-enum Tag {
+pub enum Tag {
     End,
     Byte(i8),
     Short(i16),
@@ -72,6 +72,14 @@ impl Tag {
 }
 
 impl NBT {
+    pub fn key(&self) -> &str {
+        self.key.as_ref()
+    }
+
+    pub fn tag(&self) -> &Tag {
+        &self.tag
+    }
+
     pub fn read_from<R: Read>(input: &mut DataInput<R>) -> io::Result<NBT> {
         // read tag kind
         let tag_kind = input.read_byte()?;
