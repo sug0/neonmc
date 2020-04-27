@@ -255,7 +255,7 @@ mod tests {
         let tag = Tag::List(ints);
         let nbt = NBT::new("FizzBuzz", tag);
 
-        let result = nbt.write_to(&mut output).unwrap();
+        nbt.write_to(&mut output).unwrap();
 
         // read the written file
         let gz = open_nbt_file("res/test.dat").unwrap();
