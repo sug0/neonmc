@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use crate::common::ID;
 
 /// Represents a step sound produced by an entity.
@@ -50,19 +52,21 @@ impl StepSoundMeta {
     }
 }
 
-impl From<ID> for StepSound {
-    fn from(id: ID) -> Self {
+impl TryFrom<ID> for StepSound {
+    type Error = &'static str;
+
+    fn try_from(id: ID) -> Result<Self, Self::Error> {
         match id {
-            0 => StepSound::Powder,
-            1 => StepSound::Wood,
-            2 => StepSound::Gravel,
-            3 => StepSound::Grass,
-            4 => StepSound::Stone,
-            5 => StepSound::Metal,
-            6 => StepSound::Glass,
-            7 => StepSound::Cloth,
-            8 => StepSound::Sand,
-            _ => StepSound::Stone,
+            0 => Ok(StepSound::Powder),
+            1 => Ok(StepSound::Wood),
+            2 => Ok(StepSound::Gravel),
+            3 => Ok(StepSound::Grass),
+            4 => Ok(StepSound::Stone),
+            5 => Ok(StepSound::Metal),
+            6 => Ok(StepSound::Glass),
+            7 => Ok(StepSound::Cloth),
+            8 => Ok(StepSound::Sand),
+            _ => Err("invalid id for step sound"),
         }
     }
 }
@@ -89,6 +93,7 @@ static LIST: [StepSoundMeta; 9] = [
 #[cfg(test)]
 mod tests {
     use super::StepSound;
+    use std::convert::TryFrom;
 
     #[test]
     fn test_get() {
@@ -101,7 +106,9 @@ mod tests {
 
     #[test]
     fn test_from() {
-        let stone = StepSound::from(4).get();
+        let stone = StepSound::try_from(4)
+            .unwrap()
+            .get();
 
         assert_eq!(stone.sound(), "step.stone");
         assert_eq!(stone.volume(), 1.0);
