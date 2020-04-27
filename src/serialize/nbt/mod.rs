@@ -24,6 +24,12 @@ pub struct NBT {
     tag: Tag,
 }
 
+impl From<Tag> for NBT {
+    fn from(tag: Tag) -> NBT {
+        NBT { key: String::new(), tag }
+    }
+}
+
 impl Tag {
     pub fn kind(&self) -> i8 {
         match self {
@@ -43,6 +49,11 @@ impl Tag {
 }
 
 impl NBT {
+    pub fn new<T: AsRef<str>>(key: T, tag: Tag) -> NBT {
+        let key = key.as_ref().into();
+        NBT { key, tag }
+    }
+
     pub fn key(&self) -> &str {
         self.key.as_ref()
     }
@@ -187,16 +198,26 @@ impl NBT {
 #[cfg(test)]
 mod tests {
     use std::fs::File;
-    use std::io::{self, BufReader};
-    use flate2::bufread::GzDecoder;
+    use std::default::Default;
+    use std::collections::HashMap;
+    use std::io::{self, BufReader, BufWriter};
 
-    use crate::serialize::DataInput;
+    use flate2::bufread::GzDecoder;
+    use flate2::write::GzEncoder;
+
     use crate::serialize::nbt::{NBT, Tag};
+    use crate::serialize::{DataInput, DataOutput};
 
     fn open_nbt_file(path: &str) -> io::Result<GzDecoder<BufReader<File>>> {
         let f = File::open(path)?;
         let r = BufReader::new(f);
         Ok(GzDecoder::new(r))
+    }
+
+    fn create_nbt_file(path: &str) -> io::Result<GzEncoder<BufWriter<File>>> {
+        let f = File::create(path)?;
+        let w = BufWriter::new(f);
+        Ok(GzEncoder::new(w, Default::default()))
     }
 
     #[test]
@@ -208,6 +229,42 @@ mod tests {
         
         match nbt.tag() {
             Tag::Coumpound(_) => (),
+            _ => panic!("not a coumpound tag"),
+        }
+    }
+
+    #[test]
+    fn test_nbt_write() {
+        // write nbt file
+        let gz = create_nbt_file("res/test.dat").unwrap();
+        let mut output = DataOutput::new(gz);
+
+        let ints = (0..=100)
+            .map(|x| match x {
+                _ if x%3 == 0 => ("Fizz", x),
+                _ if x%5 == 0 => ("Buzz", x),
+                _ => ("None", x),
+            })
+            .map(|(key, x)| {
+                let mut m = HashMap::new();
+                m.insert(key.into(), Tag::Int(x));
+                Tag::Coumpound(m)
+            })
+            .collect();
+
+        let tag = Tag::List(ints);
+        let nbt = NBT::new("FizzBuzz", tag);
+
+        let result = nbt.write_to(&mut output).unwrap();
+
+        // read the written file
+        let gz = open_nbt_file("res/test.dat").unwrap();
+        let mut input = DataInput::new(gz);
+
+        let nbt = NBT::read_from(&mut input).unwrap();
+        
+        match nbt.tag() {
+            Tag::List(_) => (),
             _ => panic!("not a coumpound tag"),
         }
     }
