@@ -21,7 +21,7 @@ impl<W: Write> DataOutput<W> {
         let s = s.as_ref();
 
         // write the size to the underlying output
-        self.write_short((s.len()&0xffff) as i16)?;
+        self.write_short((s.len()&0x7fff) as i16)?;
 
         // write the string bytes
         self.w.write_all(s.as_ref())
