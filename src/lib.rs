@@ -6,7 +6,3 @@ pub mod stepsound;
 
 /// Common utilities.
 pub mod common;
-
-fn main() {
-    println!(":-)")
-}

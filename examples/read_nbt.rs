@@ -1,11 +1,9 @@
-mod serialize;
-
 use std::fs::File;
 use flate2::bufread::GzDecoder;
 use std::io::{self, Read, BufRead, BufReader, Stdin};
 
-use serialize::DataInput;
-use serialize::nbt::NBT;
+use neonmc::serialize::DataInput;
+use neonmc::serialize::nbt::NBT;
 
 enum In {
     Stdin(BufReader<Stdin>),
