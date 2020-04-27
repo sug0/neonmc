@@ -19,9 +19,14 @@ impl<W: Write> DataOutput<W> {
     pub fn write_utf<T: AsRef<str>>(&mut self, s: T) -> io::Result<()> {
         // get the str
         let s = s.as_ref();
+        let size = (s.len()&0x7fff) as i16;
 
         // write the size to the underlying output
-        self.write_short((s.len()&0x7fff) as i16)?;
+        self.write_short(size)?;
+
+        if size == 0 {
+            return Ok(())
+        }
 
         // write the string bytes
         self.w.write_all(s.as_ref())
