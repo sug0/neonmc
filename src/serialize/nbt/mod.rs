@@ -15,7 +15,7 @@ pub enum Tag {
     ByteArray(Vec<i8>),
     String(String),
     List(Vec<Tag>),
-    Coumpound(HashMap<String, Tag>),
+    Compound(HashMap<String, Tag>),
 }
 
 #[derive(Clone, Debug)]
@@ -43,7 +43,7 @@ impl Tag {
             Tag::ByteArray(_) => 0x07,
             Tag::String(_) => 0x08,
             Tag::List(_) => 0x09,
-            Tag::Coumpound(_) => 0x0a,
+            Tag::Compound(_) => 0x0a,
         }
     }
 }
@@ -96,14 +96,19 @@ impl Tag {
             0x0a => {
                 let mut m = HashMap::new();
                 loop {
-                    let nbt = NBT::read_from(input)?;
+                    let tag_kind = input.read_byte()?;
 
-                    match &nbt.tag {
-                        &Tag::End => break Ok(Tag::Coumpound(m)),
-                        _ => {
-                            m.insert(nbt.key, nbt.tag);
-                        },
+                    if tag_kind == 0 {
+                        break Ok(Tag::Compound(m));
                     }
+
+                    // read tag key
+                    let key = input.read_utf()?;
+
+                    // decode tag
+                    let tag = Tag::read_from(input, tag_kind)?;
+
+                    m.insert(key, tag);
                 }
             },
             _ => Err(io::Error::new(io::ErrorKind::Other, "invalid tag kind")),
@@ -113,18 +118,17 @@ impl Tag {
 
 impl NBT {
     pub fn read_from<R: Read>(input: &mut DataInput<R>) -> io::Result<NBT> {
-        // read tag kind
         let tag_kind = input.read_byte()?;
 
-        if tag_kind == 0 {
-            return Ok(NBT { key: String::new(), tag: Tag::End })
+        if tag_kind != 10 {
+            return Err(io::Error::new(io::ErrorKind::Other, "invalid tag kind, expected compound"))
         }
 
         // read tag key
         let key = input.read_utf()?;
 
         // decode tag
-        let tag = Tag::read_from(input, tag_kind)?;
+        let tag = Tag::read_from(input, 10)?;
 
         Ok(NBT { key, tag })
     }
@@ -162,9 +166,21 @@ impl Tag {
 
                 Ok(())
             },
-            Tag::Coumpound(m) => {
+            Tag::Compound(m) => {
                 for (key, tag) in m.iter() {
-                    NBT::write(key, tag, output)?;
+                    let tag_kind = tag.kind();
+
+                    // write the tag byte
+                    output.write_byte(tag_kind)?;
+
+                    // write the key
+                    output.write_utf(key)?;
+
+                    // write the tag itself
+                    tag.write_to(output)?;
+
+                    // end
+                    output.write_byte(0)?;
                 }
                 Ok(())
             },
@@ -174,24 +190,18 @@ impl Tag {
 
 impl NBT {
     pub fn write_to<W: Write>(&self, output: &mut DataOutput<W>) -> io::Result<()> {
-        NBT::write(&self.key, &self.tag, output)
-    }
-
-    fn write<W: Write>(key: &String, tag: &Tag, output: &mut DataOutput<W>) -> io::Result<()> {
-        let tag_kind = tag.kind();
-
         // write the tag byte
-        output.write_byte(tag_kind)?;
-
-        if tag_kind == 0 {
-            return Ok(())
-        }
+        output.write_byte(10)?;
 
         // write the key
-        output.write_utf(key)?;
+        output.write_utf(&self.key)?;
 
         // write the tag itself
-        tag.write_to(output)
+        output.write_byte(self.tag.kind())?;
+        self.tag.write_to(output)?;
+
+        // end
+        output.write_byte(0)
     }
 }
 
@@ -228,7 +238,7 @@ mod tests {
         let nbt = NBT::read_from(&mut input).unwrap();
         
         match nbt.tag() {
-            Tag::Coumpound(_) => (),
+            Tag::Compound(_) => (),
             _ => panic!("not a coumpound tag"),
         }
     }
@@ -248,7 +258,7 @@ mod tests {
             .map(|(key, x)| {
                 let mut m = HashMap::new();
                 m.insert(key.into(), Tag::Int(x));
-                Tag::Coumpound(m)
+                Tag::Compound(m)
             })
             .collect();
 
