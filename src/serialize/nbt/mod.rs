@@ -197,7 +197,6 @@ impl NBT {
         output.write_utf(&self.key)?;
 
         // write the tag itself
-        output.write_byte(self.tag.kind())?;
         self.tag.write_to(output)?;
 
         // end
@@ -251,6 +250,7 @@ mod tests {
 
         let ints = (0..=100)
             .map(|x| match x {
+                _ if x%3 == 0 && x%5 == 0 => ("FizzBuzz", x),
                 _ if x%3 == 0 => ("Fizz", x),
                 _ if x%5 == 0 => ("Buzz", x),
                 _ => ("None", x),
@@ -262,7 +262,11 @@ mod tests {
             })
             .collect();
 
-        let tag = Tag::List(ints);
+        let tag = {
+            let mut m = HashMap::new();
+            m.insert("ints".into(), Tag::List(ints));
+            Tag::Compound(m)
+        };
         let nbt = NBT::new("FizzBuzz", tag);
 
         nbt.write_to(&mut output).unwrap();
