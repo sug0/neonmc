@@ -249,25 +249,16 @@ mod tests {
         let mut output = DataOutput::new(gz);
 
         let ints = (0..=100)
-            .map(|x| match x {
-                _ if x%3 == 0 && x%5 == 0 => ("FizzBuzz", x),
-                _ if x%3 == 0 => ("Fizz", x),
-                _ if x%5 == 0 => ("Buzz", x),
-                _ => ("None", x),
+            .map(|x| {
+                let s = format!("{}", x);
+                let x = Tag::Int(x);
+                (s, x)
             })
-            .map(|(key, x)| {
-                let mut m = HashMap::new();
-                m.insert(key.into(), Tag::Int(x));
-                Tag::Compound(m)
-            })
-            .collect();
-
-        let tag = {
-            let mut m = HashMap::new();
-            m.insert("ints".into(), Tag::List(ints));
-            Tag::Compound(m)
-        };
-        let nbt = NBT::new("FizzBuzz", tag);
+            .fold(HashMap::new(), |mut m, (s, x)| {
+                m.insert(s, x);
+                m
+            });
+        let nbt = NBT::new("integers", Tag::Compound(ints));
 
         nbt.write_to(&mut output).unwrap();
 
@@ -278,7 +269,7 @@ mod tests {
         let nbt = NBT::read_from(&mut input).unwrap();
         
         match nbt.tag() {
-            Tag::List(_) => (),
+            Tag::Compound(_) => (),
             _ => panic!("not a coumpound tag"),
         }
     }
