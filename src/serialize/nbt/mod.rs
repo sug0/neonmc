@@ -245,32 +245,36 @@ mod tests {
     #[test]
     fn test_nbt_write() {
         // write nbt file
-        let gz = create_nbt_file("res/test.dat").unwrap();
-        let mut output = DataOutput::new(gz);
+        {
+            let gz = create_nbt_file("res/test.dat").unwrap();
+            let mut output = DataOutput::new(gz);
 
-        let ints = (0..=100)
-            .map(|x| {
-                let s = format!("{}", x);
-                let x = Tag::Int(x);
-                (s, x)
-            })
-            .fold(HashMap::new(), |mut m, (s, x)| {
-                m.insert(s, x);
-                m
-            });
-        let nbt = NBT::new("integers", Tag::Compound(ints));
+            let ints = (0..=100)
+                .map(|x| {
+                    let s = format!("{}", x);
+                    let x = Tag::Int(x);
+                    (s, x)
+                })
+                .fold(HashMap::new(), |mut m, (s, x)| {
+                    m.insert(s, x);
+                    m
+                });
+            let nbt = NBT::new("integers", Tag::Compound(ints));
 
-        nbt.write_to(&mut output).unwrap();
+            nbt.write_to(&mut output).unwrap();
+        }
 
         // read the written file
-        let gz = open_nbt_file("res/test.dat").unwrap();
-        let mut input = DataInput::new(gz);
+        {
+            let gz = open_nbt_file("res/test.dat").unwrap();
+            let mut input = DataInput::new(gz);
 
-        let nbt = NBT::read_from(&mut input).unwrap();
-        
-        match nbt.tag() {
-            Tag::Compound(_) => (),
-            _ => panic!("not a coumpound tag"),
+            let nbt = NBT::read_from(&mut input).unwrap();
+
+            match nbt.tag() {
+                Tag::Compound(_) => (),
+                _ => panic!("not a coumpound tag"),
+            }
         }
     }
 }
