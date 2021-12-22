@@ -42,12 +42,12 @@ impl StepSoundMeta {
         self.sound
     }
 
-    /// The pitch of the sound.
+    /// The volume of the sound.
     pub fn volume(&self) -> f32 {
         self.volume
     }
 
-    /// The volume of the sound.
+    /// The pitch of the sound.
     pub fn pitch(&self) -> f32 {
         self.pitch
     }
@@ -80,15 +80,15 @@ impl StepSound {
 }
 
 static LIST: [StepSoundMeta; 9] = [
-    StepSoundMeta::new(StepSound::Powder, "step.stone", 1.0, 1.0),
-    StepSoundMeta::new(StepSound::Wood, "step.wood", 1.0, 1.0),
-    StepSoundMeta::new(StepSound::Gravel, "step.gravel", 1.0, 1.0),
-    StepSoundMeta::new(StepSound::Grass, "step.grass", 1.0, 1.0),
-    StepSoundMeta::new(StepSound::Stone, "step.stone", 1.0, 1.0),
-    StepSoundMeta::new(StepSound::Metal, "step.stone", 1.0, 1.5),
-    StepSoundMeta::new(StepSound::Glass, "step.stone", 1.0, 1.0),
-    StepSoundMeta::new(StepSound::Cloth, "step.cloth", 1.0, 1.0),
-    StepSoundMeta::new(StepSound::Sand, "step.sand", 1.0, 1.0),
+    StepSoundMeta::new(StepSound::Powder, "stone", 1.0, 1.0),
+    StepSoundMeta::new(StepSound::Wood, "wood", 1.0, 1.0),
+    StepSoundMeta::new(StepSound::Gravel, "gravel", 1.0, 1.0),
+    StepSoundMeta::new(StepSound::Grass, "grass", 1.0, 1.0),
+    StepSoundMeta::new(StepSound::Stone, "stone", 1.0, 1.0),
+    StepSoundMeta::new(StepSound::Metal, "stone", 1.0, 1.5),
+    StepSoundMeta::new(StepSound::Glass, "stone", 1.0, 1.0),
+    StepSoundMeta::new(StepSound::Cloth, "cloth", 1.0, 1.0),
+    StepSoundMeta::new(StepSound::Sand, "sand", 1.0, 1.0),
 ];
 
 #[cfg(test)]
@@ -100,7 +100,7 @@ mod tests {
     fn test_get() {
         let stone = StepSound::Stone.get();
 
-        assert_eq!(stone.sound(), "step.stone");
+        assert_eq!(stone.sound(), "stone");
         assert_eq!(stone.volume(), 1.0);
         assert_eq!(stone.pitch(), 1.0);
     }
@@ -111,7 +111,7 @@ mod tests {
             .unwrap()
             .get();
 
-        assert_eq!(stone.sound(), "step.stone");
+        assert_eq!(stone.sound(), "stone");
         assert_eq!(stone.volume(), 1.0);
         assert_eq!(stone.pitch(), 1.0);
     }
