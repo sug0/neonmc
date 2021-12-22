@@ -33,6 +33,7 @@ impl<R: Read> DataInput<R> {
         let mut buf = ManuallyDrop::new(vec![0; size]);
         self.r.read_exact(&mut buf[..])?;
 
+        // TODO: confirm UTF string is valid
         Ok(unsafe { String::from_raw_parts(buf.as_mut_ptr(), size, buf.capacity()) })
     }
 
