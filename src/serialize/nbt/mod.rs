@@ -1,8 +1,11 @@
+//! Encode or decode [NBT](https://minecraft.fandom.com/wiki/NBT_format) values.
+
 use std::collections::HashMap;
 use std::io::{self, Read, Write};
 
 use crate::serialize::{DataInput, DataOutput};
 
+/// Represents an NBT tag.
 #[derive(Clone, Debug)]
 pub enum Tag {
     End,
@@ -18,6 +21,7 @@ pub enum Tag {
     Compound(HashMap<String, Tag>),
 }
 
+/// Contains an NBT compound tag and a key.
 #[derive(Clone, Debug)]
 pub struct NBT {
     key: String,
@@ -31,6 +35,7 @@ impl From<Tag> for NBT {
 }
 
 impl Tag {
+    /// Returns a byte representing the kind of this tag.
     pub fn kind(&self) -> i8 {
         match self {
             Tag::End => 0x00,
@@ -49,15 +54,23 @@ impl Tag {
 }
 
 impl NBT {
-    pub fn new<T: AsRef<str>>(key: T, tag: Tag) -> NBT {
-        let key = key.as_ref().into();
-        NBT { key, tag }
+    /// Returns a new NBT value.
+    pub fn new<T: AsRef<str>>(key: T, tag: Tag) -> Option<NBT> {
+        match tag {
+            tag @ Tag::Compound(_) => {
+                let key = key.as_ref().into();
+                Some(NBT { key, tag })
+            },
+            _ => None,
+        }
     }
 
+    /// Returns a reference to this NBT tag's key.
     pub fn key(&self) -> &str {
         self.key.as_ref()
     }
 
+    /// Returns a reference to this NBT tag's compound value.
     pub fn tag(&self) -> &Tag {
         &self.tag
     }
@@ -117,6 +130,7 @@ impl Tag {
 }
 
 impl NBT {
+    /// This associated method decodes a new NBT from a [`DataInput`].
     pub fn read_from<R: Read>(input: &mut DataInput<R>) -> io::Result<NBT> {
         let tag_kind = input.read_byte()?;
 
@@ -187,6 +201,7 @@ impl Tag {
 }
 
 impl NBT {
+    /// This method encodes an NBT tag into a [`DataOutput`].
     pub fn write_to<W: Write>(&self, output: &mut DataOutput<W>) -> io::Result<()> {
         // write the tag byte
         output.write_byte(10)?;
@@ -251,7 +266,7 @@ mod tests {
                     (s, x)
                 })
                 .collect();
-            let nbt = NBT::new("integers", Tag::Compound(ints));
+            let nbt = NBT::new("integers", Tag::Compound(ints)).unwrap();
 
             nbt.write_to(&mut output).unwrap();
         }

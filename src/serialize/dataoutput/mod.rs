@@ -1,15 +1,17 @@
 use std::io::{self, Write};
 
-// Write Java-like encoded values.
+/// Write Java-like encoded values.
 pub struct DataOutput<W> {
     w: W,
 }
 
 impl<W> DataOutput<W> {
+    /// Creates a new writer for Java-like encoded values.
     pub fn new(w: W) -> Self {
         Self { w }
     }
 
+    /// Returns the writer associated with this [`DataOutput`].
     pub fn into_inner(self) -> W {
         self.w
     }
