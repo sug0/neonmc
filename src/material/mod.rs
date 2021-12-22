@@ -158,30 +158,14 @@ static LIST: [MaterialMeta; 21] = [
     MaterialMeta::default_material(),
 ];
 
-/*
 #[cfg(test)]
 mod tests {
-    use super::StepSound;
-    use std::convert::TryFrom;
+    use super::Material;
 
     #[test]
     fn test_get() {
-        let stone = StepSound::Stone.get();
+        let tnt = Material::Tnt.get();
 
-        assert_eq!(stone.sound(), "stone");
-        assert_eq!(stone.volume(), 1.0);
-        assert_eq!(stone.pitch(), 1.0);
-    }
-
-    #[test]
-    fn test_from() {
-        let stone = StepSound::try_from(4)
-            .unwrap()
-            .get();
-
-        assert_eq!(stone.sound(), "stone");
-        assert_eq!(stone.volume(), 1.0);
-        assert_eq!(stone.pitch(), 1.0);
+        assert!(tnt.can_burn());
     }
 }
-*/
