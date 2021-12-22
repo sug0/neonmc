@@ -178,11 +178,9 @@ impl Tag {
 
                     // write the tag itself
                     tag.write_to(output)?;
-
-                    // end
-                    output.write_byte(0)?;
                 }
-                Ok(())
+                // end
+                output.write_byte(0)
             },
         }
     }
@@ -197,10 +195,7 @@ impl NBT {
         output.write_utf(&self.key)?;
 
         // write the tag itself
-        self.tag.write_to(output)?;
-
-        // end
-        output.write_byte(0)
+        self.tag.write_to(output)
     }
 }
 
@@ -249,16 +244,13 @@ mod tests {
             let gz = create_nbt_file("res/test.dat").unwrap();
             let mut output = DataOutput::new(gz);
 
-            let ints = (0..=100)
+            let ints: HashMap<String, Tag> = (0..=100)
                 .map(|x| {
                     let s = format!("{}", x);
                     let x = Tag::Int(x);
                     (s, x)
                 })
-                .fold(HashMap::new(), |mut m, (s, x)| {
-                    m.insert(s, x);
-                    m
-                });
+                .collect();
             let nbt = NBT::new("integers", Tag::Compound(ints));
 
             nbt.write_to(&mut output).unwrap();
