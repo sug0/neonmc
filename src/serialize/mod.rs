@@ -1,3 +1,5 @@
+//! Serialize content to disk or across the wire.
+
 mod datainput;
 mod dataoutput;
 

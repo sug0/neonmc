@@ -1,3 +1,5 @@
+//! Sounds played upon stepping on a block.
+
 use std::convert::TryFrom;
 
 use crate::common::ID;
@@ -10,8 +12,7 @@ pub struct StepSoundMeta {
     sound: &'static str,
 }
 
-/// The sound played by stepping on the
-/// respective material.
+/// The sound played by stepping on the respective material.
 #[repr(usize)]
 #[derive(Copy, Clone, Debug)]
 pub enum StepSound {

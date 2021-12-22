@@ -41,36 +41,43 @@ impl<W: Write> DataOutput<W> {
         self.w.write_all(slice)
     }
 
+    /// Write all the bytes in `buf` to the internal writer.
     pub fn write_bytes<T: AsRef<[i8]>>(&mut self, buf: T) -> io::Result<()> {
         let buf: &[u8] = unsafe { std::mem::transmute(buf.as_ref()) };
         self.w.write_all(buf)
     }
 
+    /// Write a single byte to the internal writer.
     pub fn write_byte(&mut self, x: i8) -> io::Result<()> {
         let buf = x.to_be_bytes();
         self.w.write_all(&buf[..])
     }
 
+    /// Write a short value to the internal writer.
     pub fn write_short(&mut self, x: i16) -> io::Result<()> {
         let buf = x.to_be_bytes();
         self.w.write_all(&buf[..])
     }
 
+    /// Write a word to the internal writer.
     pub fn write_int(&mut self, x: i32) -> io::Result<()> {
         let buf = x.to_be_bytes();
         self.w.write_all(&buf[..])
     }
 
+    /// Write a long value to the internal writer.
     pub fn write_long(&mut self, x: i64) -> io::Result<()> {
         let buf = x.to_be_bytes();
         self.w.write_all(&buf[..])
     }
 
+    /// Write an [`f32`] to the internal writer.
     pub fn write_float(&mut self, x: f32) -> io::Result<()> {
         let buf = x.to_be_bytes();
         self.w.write_all(&buf[..])
     }
 
+    /// Write an [`f64`] to the internal writer.
     pub fn write_double(&mut self, x: f64) -> io::Result<()> {
         let buf = x.to_be_bytes();
         self.w.write_all(&buf[..])
