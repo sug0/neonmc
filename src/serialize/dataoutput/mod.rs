@@ -16,10 +16,19 @@ impl<W> DataOutput<W> {
 }
 
 impl<W: Write> DataOutput<W> {
+    /// Write a [UTF encoded](https://en.wikipedia.org/wiki/UTF-8#Modified_UTF-8) string.
     pub fn write_utf<T: AsRef<str>>(&mut self, s: T) -> io::Result<()> {
         // get the str
         let s = s.as_ref();
-        let size = (s.len()&0x7fff) as i16;
+        let slice: &[u8] = s.as_ref();
+        let slice: &[u8] = &slice[..slice.len() & 0x7fff];
+
+        // string size overflows i16
+        if slice.len() < s.len() {
+            return Err(io::Error::new(io::ErrorKind::Other, "string size overflows i16"));
+        }
+
+        let size = slice.len() as i16;
 
         // write the size to the underlying output
         self.write_short(size)?;
@@ -29,7 +38,7 @@ impl<W: Write> DataOutput<W> {
         }
 
         // write the string bytes
-        self.w.write_all(s.as_ref())
+        self.w.write_all(slice)
     }
 
     pub fn write_bytes<T: AsRef<[i8]>>(&mut self, buf: T) -> io::Result<()> {
